@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Outils Pompiers</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:       #07070F;
+  --bg2:      #0F0F1A;
+  --bg3:      #15151F;
+  --border:   #1E1E2E;
+  --border2:  #2A2A3E;
+  --text:     #F0F0F5;
+  --text2:    #9090A8;
+  --text3:    #555566;
+  --red:      #FF3B3B;
+  --orange:   #FF6B35;
+  --sapcolor: #4EADFF;
+  --inccolor: #FF3B3B;
+  --font-title: 'Syne', sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --radius:   16px;
+  --radius-sm:10px;
+}
+html, body { background:var(--bg); color:var(--text); font-family:var(--font-mono); min-height:100vh; overflow-x:hidden; }
+
+/* TOPBAR */
+.topbar {
+  position:fixed; top:0; left:0; right:0; height:60px;
+  background:rgba(7,7,15,0.95); backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; z-index:1000;
+}
+.topbar-title {
+  font-family:var(--font-title); font-size:18px; font-weight:800;
+  background:linear-gradient(135deg,var(--red),var(--orange));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+/* HAMBURGER */
+.hamburger {
+  width:40px; height:40px; display:flex; flex-direction:column;
+  justify-content:center; align-items:center; gap:5px;
+  cursor:pointer; border:1px solid var(--border2);
+  border-radius:var(--radius-sm); background:var(--bg3); transition:all .2s;
+}
+.hamburger:hover { border-color:var(--red); }
+.hamburger span { display:block; width:18px; height:2px; background:var(--text); border-radius:2px; transition:all .3s; }
+.hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity:0; }
+.hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+/* MENU OVERLAY */
+.menu-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0);
+  z-index:900; pointer-events:none; transition:background .3s;
+}
+.menu-overlay.open { background:rgba(0,0,0,0.7); pointer-events:all; }
+
+/* MENU DRAWER */
+.menu-drawer {
+  position:fixed; top:0; right:-300px; width:280px; height:100vh;
+  background:var(--bg2); border-left:1px solid var(--border);
+  z-index:950; transition:right .3s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+.menu-drawer.open { right:0; }
+
+.menu-header { padding:70px 24px 24px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+.menu-header-label { font-size:10px; color:var(--text3); letter-spacing:3px; text-transform:uppercase; margin-bottom:6px; }
+.menu-header-name {
+  font-family:var(--font-title); font-size:22px; font-weight:800;
+  background:linear-gradient(135deg,var(--red),var(--orange));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+
+.menu-section-label { font-size:9px; color:var(--text3); letter-spacing:3px; text-transform:uppercase; padding:16px 24px 8px; }
+
+.menu-item {
+  display:flex; align-items:center; gap:14px; padding:13px 24px;
+  cursor:pointer; transition:all .15s; border-left:3px solid transparent; color:var(--text2);
+}
+.menu-item:hover { background:var(--bg3); color:var(--text); }
+.menu-item.active-sap { border-left-color:var(--sapcolor); background:rgba(78,173,255,0.06); color:var(--sapcolor); }
+.menu-item.active-inc { border-left-color:var(--inccolor); background:rgba(255,59,59,0.06); color:var(--inccolor); }
+.menu-item-icon { font-size:18px; width:28px; text-align:center; }
+.menu-item-text { font-family:var(--font-title); font-size:15px; font-weight:600; }
+
+.menu-divider { height:1px; background:var(--border); margin:8px 24px; }
+
+/* PAGES */
+.main { padding-top:60px; min-height:100vh; }
+.page { display:none; padding:24px 20px 80px; animation:fadeIn .2s ease; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+.page-label { font-size:10px; color:var(--text3); letter-spacing:3px; text-transform:uppercase; margin-bottom:4px; }
+.page-title { font-family:var(--font-title); font-size:28px; font-weight:800; letter-spacing:-1px; margin-bottom:24px; }
+
+/* ACCUEIL - tuiles */
+.home-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px; }
+.home-card {
+  border-radius:var(--radius); padding:20px 16px; cursor:pointer;
+  transition:all .2s; border:1px solid;
+}
+.home-card-sap { background:rgba(78,173,255,0.08); border-color:rgba(78,173,255,0.3); }
+.home-card-inc { background:rgba(255,59,59,0.08);  border-color:rgba(255,59,59,0.3); }
+.home-card:hover { transform:translateY(-3px); }
+.home-card-icon { font-size:32px; margin-bottom:10px; }
+.home-card-title { font-family:var(--font-title); font-size:16px; font-weight:800; margin-bottom:4px; }
+.home-card-sub { font-size:11px; color:var(--text3); line-height:1.4; }
+
+.section-cat-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; margin-bottom:10px; margin-top:4px; }
+
+/* Placeholder pages */
+.placeholder { margin-top:40px; text-align:center; color:var(--text3); font-size:13px; line-height:2; }
+.placeholder-icon { font-size:48px; margin-bottom:12px; }
+
+/* CARD générique */
+.card { background:var(--bg3); border-radius:var(--radius); border:1px solid var(--border); padding:20px; margin-bottom:14px; }
+.card-title { font-family:var(--font-title); font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:16px; }
+
+/* SECTION STRIP info */
+.section-strip { display:flex; align-items:center; gap:10px; padding:10px 16px; border-radius:var(--radius-sm); margin-bottom:16px; }
+.section-strip-sap { background:rgba(78,173,255,0.08); border-left:4px solid var(--sapcolor); }
+.section-strip-text { font-family:var(--font-title); font-size:13px; font-weight:700; }
+
+/* GLASGOW OPTIONS */
+.glasgow-option {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  margin-bottom:7px; cursor:pointer; transition:all .15s;
+}
+.glasgow-option:hover { border-color:var(--sapcolor); background:rgba(78,173,255,0.05); }
+.glasgow-option.selected { border-color:var(--sapcolor); background:rgba(78,173,255,0.12); }
+.glasgow-option-text { font-size:13px; color:var(--text2); line-height:1.3; }
+.glasgow-option.selected .glasgow-option-text { color:var(--text); }
+.glasgow-badge {
+  font-family:var(--font-title); font-size:14px; font-weight:800;
+  color:var(--sapcolor); background:rgba(78,173,255,0.15);
+  padding:3px 10px; border-radius:20px; flex-shrink:0; margin-left:10px;
+}
+
+/* GLASGOW RÉSULTAT */
+.glasgow-total {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--bg); border-radius:var(--radius); padding:18px 20px;
+  margin-top:6px; border:1px solid var(--border2); transition:border-color .3s;
+}
+.glasgow-total-label { font-size:11px; color:var(--text3); margin-bottom:4px; }
+.glasgow-total-interp { font-size:12px; font-weight:600; margin-top:4px; max-width:180px; line-height:1.4; }
+.glasgow-total-score { font-family:var(--font-title); font-size:52px; font-weight:800; line-height:1; text-align:right; }
+.glasgow-total-sur15 { font-size:11px; color:var(--text3); text-align:right; margin-top:2px; }
+
+/* BTN */
+.btn-calc { width:100%; padding:15px; border:none; border-radius:var(--radius); font-family:var(--font-title); font-size:15px; font-weight:700; cursor:pointer; margin-top:12px; transition:all .2s; }
+.btn-sap { background:var(--sapcolor); color:var(--bg); }
+.btn-calc:hover { opacity:0.85; transform:translateY(-1px); }
+.btn-calc:active { transform:translateY(0); }
+
+/* CHAMPS */
+.field { margin-bottom:14px; }
+.field-label { font-size:10px; color:var(--text3); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px; display:block; }
+.field input, .field select {
+  width:100%; background:var(--bg); border:1px solid var(--border2);
+  border-radius:var(--radius-sm); padding:12px 14px; color:var(--text);
+  font-family:var(--font-mono); font-size:16px; outline:none;
+  transition:border-color .2s; -webkit-appearance:none;
+}
+.field input:focus, .field select:focus { border-color:var(--sapcolor); }
+.field select option { background:var(--bg2); }
+
+/* RÉSULTAT O2 */
+.o2-results { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+.o2-result-box { border-radius:var(--radius); padding:18px 14px; text-align:center; border:1px solid; }
+.o2-result-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; opacity:0.8; }
+.o2-result-value { font-family:var(--font-title); font-size:40px; font-weight:800; line-height:1; letter-spacing:-1px; }
+.o2-result-unit { font-size:12px; opacity:0.7; margin-top:4px; }
+.o2-result-heure { font-size:11px; margin-top:6px; opacity:0.6; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-title">🚒 Outils Pompiers</div>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+
+<!-- MENU DRAWER -->
+<div class="menu-drawer" id="menuDrawer">
+  <div class="menu-header">
+    <div class="menu-header-label">Navigation</div>
+    <div class="menu-header-name">Outils Pompiers</div>
+  </div>
+
+  <div class="menu-section-label">🔵 Secours à Personne</div>
+  <div class="menu-item" onclick="naviguer('glasgow', this, 'sap')">
+    <span class="menu-item-icon">🧠</span>
+    <span class="menu-item-text">Score de Glasgow</span>
+  </div>
+  <div class="menu-item" onclick="naviguer('oxygene', this, 'sap')">
+    <span class="menu-item-icon">🫁</span>
+    <span class="menu-item-text">Oxygène restant</span>
+  </div>
+
+  <div class="menu-divider"></div>
+
+  <div class="menu-section-label">🔴 Incendie</div>
+  <div class="menu-item" onclick="naviguer('ari', this, 'inc')">
+    <span class="menu-item-icon">⛑️</span>
+    <span class="menu-item-text">Temps ARI</span>
+  </div>
+  <div class="menu-item" onclick="naviguer('aspiration', this, 'inc')">
+    <span class="menu-item-icon">💧</span>
+    <span class="menu-item-text">Aspiration motopompe</span>
+  </div>
+</div>
+
+<!-- CONTENU -->
+<div class="main">
+
+  <!-- ACCUEIL -->
+  <div class="page active" id="page-accueil">
+    <div class="page-label">Tableau de bord</div>
+    <div class="page-title">🚒 Outils Pompiers</div>
+
+    <div class="section-cat-label" style="color:var(--sapcolor)">Secours à Personne</div>
+    <div class="home-grid" style="margin-bottom:20px">
+      <div class="home-card home-card-sap" onclick="naviguer('glasgow', null, 'sap')">
+        <div class="home-card-icon">🧠</div>
+        <div class="home-card-title" style="color:var(--sapcolor)">Glasgow</div>
+        <div class="home-card-sub">Score neurologique</div>
+      </div>
+      <div class="home-card home-card-sap" onclick="naviguer('oxygene', null, 'sap')">
+        <div class="home-card-icon">🫁</div>
+        <div class="home-card-title" style="color:var(--sapcolor)">Oxygène</div>
+        <div class="home-card-sub">Temps restant bouteille</div>
+      </div>
+    </div>
+
+    <div class="section-cat-label" style="color:var(--inccolor)">Incendie</div>
+    <div class="home-grid">
+      <div class="home-card home-card-inc" onclick="naviguer('ari', null, 'inc')">
+        <div class="home-card-icon">⛑️</div>
+        <div class="home-card-title" style="color:var(--inccolor)">ARI</div>
+        <div class="home-card-sub">Temps d'utilisation restant</div>
+      </div>
+      <div class="home-card home-card-inc" onclick="naviguer('aspiration', null, 'inc')">
+        <div class="home-card-icon">💧</div>
+        <div class="home-card-title" style="color:var(--inccolor)">Aspiration</div>
+        <div class="home-card-sub">Temps de mise en eau</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLASGOW -->
+  <div class="page" id="page-glasgow">
+    <div class="page-label">Secours à Personne</div>
+    <div class="page-title" style="color:var(--sapcolor)">🧠 Score de Glasgow</div>
+
+    <div class="section-strip section-strip-sap">
+      <span style="font-size:18px">ℹ️</span>
+      <span class="section-strip-text" style="color:var(--sapcolor)">Normal : 15 &nbsp;·&nbsp; Coma sévère : ≤ 8 &nbsp;·&nbsp; Minimum : 3</span>
+    </div>
+
+    <!-- YEUX -->
+    <div class="card">
+      <div class="card-title" style="color:var(--sapcolor)">👁️ Ouverture des yeux (Y)</div>
+      <div class="glasgow-option" onclick="selectGlasgow('Y',4,this)">
+        <span class="glasgow-option-text">Spontanée</span><span class="glasgow-badge">4</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('Y',3,this)">
+        <span class="glasgow-option-text">À la demande verbale</span><span class="glasgow-badge">3</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('Y',2,this)">
+        <span class="glasgow-option-text">À la douleur</span><span class="glasgow-badge">2</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('Y',1,this)">
+        <span class="glasgow-option-text">Aucune ouverture</span><span class="glasgow-badge">1</span>
+      </div>
+    </div>
+
+    <!-- VERBAL -->
+    <div class="card">
+      <div class="card-title" style="color:var(--sapcolor)">💬 Réponse verbale (V)</div>
+      <div class="glasgow-option" onclick="selectGlasgow('V',5,this)">
+        <span class="glasgow-option-text">Orientée, claire</span><span class="glasgow-badge">5</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('V',4,this)">
+        <span class="glasgow-option-text">Confuse, désorientée</span><span class="glasgow-badge">4</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('V',3,this)">
+        <span class="glasgow-option-text">Mots inappropriés</span><span class="glasgow-badge">3</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('V',2,this)">
+        <span class="glasgow-option-text">Sons incompréhensibles</span><span class="glasgow-badge">2</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('V',1,this)">
+        <span class="glasgow-option-text">Aucune réponse verbale</span><span class="glasgow-badge">1</span>
+      </div>
+    </div>
+
+    <!-- MOTEUR -->
+    <div class="card">
+      <div class="card-title" style="color:var(--sapcolor)">🖐️ Réponse motrice (M)</div>
+      <div class="glasgow-option" onclick="selectGlasgow('M',6,this)">
+        <span class="glasgow-option-text">Obéit aux ordres</span><span class="glasgow-badge">6</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('M',5,this)">
+        <span class="glasgow-option-text">Localise la douleur</span><span class="glasgow-badge">5</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('M',4,this)">
+        <span class="glasgow-option-text">Retrait à la douleur</span><span class="glasgow-badge">4</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('M',3,this)">
+        <span class="glasgow-option-text">Flexion anormale (décortication)<br><span style="font-size:11px;color:var(--text3)">Bras fléchis, poignets en rotation interne, jambes en extension</span></span><span class="glasgow-badge">3</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('M',2,this)">
+        <span class="glasgow-option-text">Extension (décérébration)<br><span style="font-size:11px;color:var(--text3)">Bras et jambes en extension rigide, mâchoires serrées</span></span><span class="glasgow-badge">2</span>
+      </div>
+      <div class="glasgow-option" onclick="selectGlasgow('M',1,this)">
+        <span class="glasgow-option-text">Aucune réponse motrice</span><span class="glasgow-badge">1</span>
+      </div>
+    </div>
+
+    <!-- RÉSULTAT -->
+    <div class="glasgow-total" id="glasgow-result">
+      <div>
+        <div class="glasgow-total-label">Score total Y + V + M</div>
+        <div class="glasgow-total-interp" id="glasgow-interp" style="color:var(--text3)">Sélectionne les 3 catégories</div>
+      </div>
+      <div>
+        <div class="glasgow-total-score" id="glasgow-score" style="color:var(--text3)">—</div>
+        <div class="glasgow-total-sur15">/15</div>
+      </div>
+    </div>
+
+    <button class="btn-calc btn-sap" onclick="resetGlasgow()">🔄 Réinitialiser</button>
+  </div>
+
+  <!-- OXYGÈNE -->
+  <div class="page" id="page-oxygene">
+    <div class="page-label">Secours à Personne</div>
+    <div class="page-title" style="color:var(--sapcolor)">🫁 Oxygène restant</div>
+
+    <div class="section-strip section-strip-sap">
+      <span style="font-size:18px">ℹ️</span>
+      <span class="section-strip-text" style="color:var(--sapcolor)">Temps réel + marge de sécurité 10 %</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--sapcolor)">Paramètres bouteille</div>
+
+      <div class="field">
+        <label class="field-label">Volume de la bouteille (litres)</label>
+        <select id="o2-volume" onchange="toggleO2Custom()">
+          <option value="2">2 L — Bouteille légère</option>
+          <option value="5" selected>5 L — Bouteille standard</option>
+          <option value="11">11 L — Grande bouteille</option>
+          <option value="15">15 L — Bouteille hôpital</option>
+          <option value="custom">Autre volume...</option>
+        </select>
+      </div>
+
+      <div class="field" id="o2-custom-field" style="display:none">
+        <label class="field-label">Volume personnalisé (litres)</label>
+        <input type="number" id="o2-volume-custom" placeholder="Ex : 8" min="1" max="50" inputmode="decimal">
+      </div>
+
+      <div class="field">
+        <label class="field-label">Pression actuelle (bar)</label>
+        <input type="number" id="o2-pression" placeholder="Ex : 150" min="0" max="300" inputmode="decimal">
+      </div>
+
+      <div class="field">
+        <label class="field-label">Débit d'administration (L/min)</label>
+        <select id="o2-debit">
+          <option value="1">1 L/min</option>
+          <option value="2">2 L/min</option>
+          <option value="3">3 L/min</option>
+          <option value="6" selected>6 L/min — Standard SAP</option>
+          <option value="9">9 L/min</option>
+          <option value="12">12 L/min — Masque haute concentration</option>
+          <option value="15">15 L/min — Maximum</option>
+        </select>
+      </div>
+
+      <button class="btn-calc btn-sap" onclick="calculerO2()">Calculer</button>
+    </div>
+
+    <div id="o2-result" style="display:none">
+      <div class="o2-results">
+        <!-- Temps réel -->
+        <div class="o2-result-box" style="background:rgba(78,173,255,0.08);border-color:rgba(78,173,255,0.35)">
+          <div class="o2-result-label" style="color:var(--sapcolor)">Temps restant</div>
+          <div class="o2-result-value" id="o2-temps-reel" style="color:var(--sapcolor)">—</div>
+          <div class="o2-result-unit" style="color:var(--sapcolor)">min</div>
+          <div class="o2-result-heure" id="o2-heure-reel" style="color:var(--sapcolor)"></div>
+        </div>
+        <!-- Avec marge 10% -->
+        <div class="o2-result-box" style="background:rgba(255,215,0,0.07);border-color:rgba(255,215,0,0.35)">
+          <div class="o2-result-label" style="color:#FFD700">Avec marge −10 %</div>
+          <div class="o2-result-value" id="o2-temps-marge" style="color:#FFD700">—</div>
+          <div class="o2-result-unit" style="color:#FFD700">min</div>
+          <div class="o2-result-heure" id="o2-heure-marge" style="color:#FFD700"></div>
+        </div>
+      </div>
+
+      <!-- Détail calcul -->
+      <div style="background:var(--bg3);border-radius:var(--radius);padding:14px 16px;margin-top:12px;border:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">Détail du calcul</div>
+        <div id="o2-detail" style="font-size:12px;color:var(--text2);line-height:2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARI (vide pour l'instant) -->
+  <div class="page" id="page-ari">
+    <div class="page-label">Incendie</div>
+    <div class="page-title" style="color:var(--inccolor)">⛑️ Temps ARI</div>
+    <div class="placeholder">
+      <div class="placeholder-icon">🚧</div>
+      Page en construction — à venir !
+    </div>
+  </div>
+
+  <!-- ASPIRATION (vide pour l'instant) -->
+  <div class="page" id="page-aspiration">
+    <div class="page-label">Incendie</div>
+    <div class="page-title" style="color:var(--inccolor)">💧 Aspiration motopompe</div>
+    <div class="placeholder">
+      <div class="placeholder-icon">🚧</div>
+      Page en construction — à venir !
+    </div>
+  </div>
+
+</div>
+
+<script>
+let menuOuvert = false;
+
+function toggleMenu() {
+  menuOuvert = !menuOuvert;
+  document.getElementById('hamburger').classList.toggle('open', menuOuvert);
+  document.getElementById('menuDrawer').classList.toggle('open', menuOuvert);
+  document.getElementById('menuOverlay').classList.toggle('open', menuOuvert);
+}
+
+function closeMenu() {
+  menuOuvert = false;
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('menuDrawer').classList.remove('open');
+  document.getElementById('menuOverlay').classList.remove('open');
+}
+
+function naviguer(page, el, type) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active-sap', 'active-inc'));
+  if (el) el.classList.add('active-' + type);
+  closeMenu();
+  window.scrollTo(0, 0);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+// ── OXYGÈNE ───────────────────────────────────────────────
+function toggleO2Custom() {
+  const val = document.getElementById('o2-volume').value;
+  document.getElementById('o2-custom-field').style.display = val === 'custom' ? 'block' : 'none';
+}
+
+function calculerO2() {
+  const volSel   = document.getElementById('o2-volume').value;
+  const volume   = volSel === 'custom'
+    ? parseFloat(document.getElementById('o2-volume-custom').value)
+    : parseFloat(volSel);
+  const pression = parseFloat(document.getElementById('o2-pression').value);
+  const debit    = parseFloat(document.getElementById('o2-debit').value);
+
+  if (!volume || isNaN(pression) || pression <= 0 || !debit) {
+    alert('Remplis tous les champs correctement !'); return;
+  }
+
+  // Volume d'O2 disponible = volume bouteille × pression
+  const volDispo    = volume * pression;                      // litres
+  const tempsReel   = volDispo / debit;                       // minutes
+  const tempsMarge  = tempsReel * 0.9;                        // −10 %
+
+  function fmt(min) {
+    const h = Math.floor(min / 60);
+    const m = Math.floor(min % 60);
+    return h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m} min`;
+  }
+
+  document.getElementById('o2-result').style.display = 'block';
+  document.getElementById('o2-temps-reel').textContent  = Math.floor(tempsReel);
+  document.getElementById('o2-temps-marge').textContent = Math.floor(tempsMarge);
+  document.getElementById('o2-heure-reel').textContent  = fmt(tempsReel);
+  document.getElementById('o2-heure-marge').textContent = fmt(tempsMarge);
+
+  document.getElementById('o2-detail').innerHTML =
+    `Volume dispo : <strong style="color:var(--text)">${volDispo.toFixed(0)} L</strong> (${volume} L × ${pression} bar)<br>` +
+    `Débit : <strong style="color:var(--text)">${debit} L/min</strong><br>` +
+    `Temps réel : <strong style="color:var(--sapcolor)">${Math.floor(tempsReel)} min</strong> (${fmt(tempsReel)})<br>` +
+    `Avec marge −10 % : <strong style="color:#FFD700">${Math.floor(tempsMarge)} min</strong> (${fmt(tempsMarge)})`;
+}
+const glasgowScores = { Y:0, V:0, M:0 };
+
+function selectGlasgow(cat, score, el) {
+  el.closest('.card').querySelectorAll('.glasgow-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  glasgowScores[cat] = score;
+  updateGlasgowTotal();
+}
+
+function updateGlasgowTotal() {
+  const total    = glasgowScores.Y + glasgowScores.V + glasgowScores.M;
+  const scoreEl  = document.getElementById('glasgow-score');
+  const interpEl = document.getElementById('glasgow-interp');
+  const resultEl = document.getElementById('glasgow-result');
+
+  if (!glasgowScores.Y || !glasgowScores.V || !glasgowScores.M) {
+    scoreEl.textContent  = '—';
+    scoreEl.style.color  = 'var(--text3)';
+    interpEl.textContent = 'Sélectionne les 3 catégories';
+    interpEl.style.color = 'var(--text3)';
+    resultEl.style.borderColor = 'var(--border2)';
+    return;
+  }
+
+  scoreEl.textContent = total;
+  let interp, color;
+  if      (total >= 13) { interp = '✅ Conscience normale';       color = '#00E5A0'; }
+  else if (total >= 9)  { interp = '⚠️ Trouble modéré';           color = '#FFD700'; }
+  else if (total >= 6)  { interp = '🔴 Coma léger à modéré';      color = '#FF6B35'; }
+  else                  { interp = '🆘 Coma sévère — Urgence !';  color = '#FF3B3B'; }
+
+  scoreEl.style.color        = color;
+  interpEl.textContent       = interp;
+  interpEl.style.color       = color;
+  resultEl.style.borderColor = color + '55';
+}
+
+function resetGlasgow() {
+  glasgowScores.Y = 0; glasgowScores.V = 0; glasgowScores.M = 0;
+  document.querySelectorAll('.glasgow-option').forEach(o => o.classList.remove('selected'));
+  const scoreEl  = document.getElementById('glasgow-score');
+  const interpEl = document.getElementById('glasgow-interp');
+  const resultEl = document.getElementById('glasgow-result');
+  scoreEl.textContent  = '—';
+  scoreEl.style.color  = 'var(--text3)';
+  interpEl.textContent = 'Sélectionne les 3 catégories';
+  interpEl.style.color = 'var(--text3)';
+  resultEl.style.borderColor = 'var(--border2)';
+}
+</script>
+</body>
+</html>
