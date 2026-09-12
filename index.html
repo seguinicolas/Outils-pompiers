@@ -22,6 +22,7 @@
   --sapcolor: #4EADFF;
   --inccolor: #FF3B3B;
   --gardecolor: #4EE29A;
+  --routiercolor: #FFB627;
   --font-title: 'Syne', sans-serif;
   --font-mono:  'DM Mono', monospace;
   --radius:   16px;
@@ -79,6 +80,7 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
 .menu-item.active-sap { border-left-color:var(--sapcolor); background:rgba(78,173,255,0.06); color:var(--sapcolor); }
 .menu-item.active-inc { border-left-color:var(--inccolor); background:rgba(255,59,59,0.06); color:var(--inccolor); }
 .menu-item.active-garde { border-left-color:var(--gardecolor); background:rgba(78,226,154,0.06); color:var(--gardecolor); }
+.menu-item.active-routier { border-left-color:var(--routiercolor); background:rgba(255,182,39,0.06); color:var(--routiercolor); }
 .menu-item-icon { font-size:18px; width:28px; text-align:center; }
 .menu-item-text { font-family:var(--font-title); font-size:15px; font-weight:600; }
 .menu-divider { height:1px; background:var(--border); margin:8px 24px; }
@@ -96,6 +98,7 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
 .home-card-sap { background:rgba(78,173,255,0.08); border-color:rgba(78,173,255,0.3); }
 .home-card-inc { background:rgba(255,59,59,0.08);  border-color:rgba(255,59,59,0.3); }
 .home-card-garde { background:rgba(78,226,154,0.08); border-color:rgba(78,226,154,0.3); }
+.home-card-routier { background:rgba(255,182,39,0.08); border-color:rgba(255,182,39,0.3); }
 .home-card-full { grid-column:1 / -1; display:flex; align-items:center; gap:14px; }
 .home-card:hover { transform:translateY(-3px); }
 .home-card-icon { font-size:32px; margin-bottom:10px; }
@@ -180,6 +183,14 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
     <span class="menu-item-icon">🫁</span>
     <span class="menu-item-text">Oxygène restant</span>
   </div>
+  <div class="menu-item" onclick="naviguer('protocole', this, 'sap')">
+    <span class="menu-item-icon">💉</span>
+    <span class="menu-item-text">Protocole infirmier</span>
+  </div>
+  <div class="menu-item" onclick="naviguer('constantes', this, 'sap')">
+    <span class="menu-item-icon">📊</span>
+    <span class="menu-item-text">Constantes</span>
+  </div>
 
   <div class="menu-divider"></div>
 
@@ -187,6 +198,14 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
   <div class="menu-item" onclick="naviguer('garde', this, 'garde')">
     <span class="menu-item-icon">🗓️</span>
     <span class="menu-item-text">Garde</span>
+  </div>
+
+  <div class="menu-divider"></div>
+
+  <div class="menu-section-label">🟠 Secours Routier</div>
+  <div class="menu-item" onclick="naviguer('code-danger', this, 'routier')">
+    <span class="menu-item-icon">☣️</span>
+    <span class="menu-item-text">Code danger</span>
   </div>
 
   <div class="menu-divider"></div>
@@ -220,6 +239,16 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
         <div class="home-card-title" style="color:var(--sapcolor)">Oxygène</div>
         <div class="home-card-sub">Temps restant bouteille</div>
       </div>
+      <div class="home-card home-card-sap" onclick="naviguer('protocole', null, 'sap')">
+        <div class="home-card-icon">💉</div>
+        <div class="home-card-title" style="color:var(--sapcolor)">Protocole infirmier</div>
+        <div class="home-card-sub">En construction</div>
+      </div>
+      <div class="home-card home-card-sap" onclick="naviguer('constantes', null, 'sap')">
+        <div class="home-card-icon">📊</div>
+        <div class="home-card-title" style="color:var(--sapcolor)">Constantes</div>
+        <div class="home-card-sub">En construction</div>
+      </div>
     </div>
 
     <div class="section-cat-label" style="color:var(--gardecolor)">Planning</div>
@@ -229,6 +258,17 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
         <div>
           <div class="home-card-title" style="color:var(--gardecolor)">Garde</div>
           <div class="home-card-sub">Ajouter une garde à l'agenda</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-cat-label" style="color:var(--routiercolor)">Secours Routier</div>
+    <div class="home-grid" style="margin-bottom:20px">
+      <div class="home-card home-card-routier home-card-full" onclick="naviguer('code-danger', null, 'routier')">
+        <div class="home-card-icon" style="margin-bottom:0">☣️</div>
+        <div>
+          <div class="home-card-title" style="color:var(--routiercolor)">Code danger</div>
+          <div class="home-card-sub">Décoder un code Kemler / panneau ADR</div>
         </div>
       </div>
     </div>
@@ -400,6 +440,24 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
     </div>
   </div>
 
+  <div class="page" id="page-protocole">
+    <div class="page-label">Secours à Personne</div>
+    <div class="page-title" style="color:var(--sapcolor)">💉 Protocole infirmier</div>
+    <div class="placeholder">
+      <div class="placeholder-icon">🚧</div>
+      Page en construction — à venir !
+    </div>
+  </div>
+
+  <div class="page" id="page-constantes">
+    <div class="page-label">Secours à Personne</div>
+    <div class="page-title" style="color:var(--sapcolor)">📊 Constantes</div>
+    <div class="placeholder">
+      <div class="placeholder-icon">🚧</div>
+      Page en construction — à venir !
+    </div>
+  </div>
+
   <div class="page" id="page-garde">
     <div class="page-label">Planning</div>
     <div class="page-title" style="color:var(--gardecolor)">🗓️ Garde</div>
@@ -432,6 +490,56 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
       <button class="btn-calc" style="background:var(--gardecolor); color:var(--bg)" onclick="ajouterGarde()" id="garde-btn">📅 Ajouter à l'agenda</button>
 
       <div id="garde-status" style="margin-top:10px; font-size:12px; text-align:center; display:none"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-code-danger">
+    <div class="page-label">Secours Routier</div>
+    <div class="page-title" style="color:var(--routiercolor)">☣️ Code danger</div>
+
+    <div class="section-strip" style="background:rgba(255,182,39,0.08); border-left:4px solid var(--routiercolor)">
+      <span style="font-size:18px">ℹ️</span>
+      <span class="section-strip-text" style="color:var(--routiercolor)">Code Kemler (partie haute du panneau orange ADR)</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--routiercolor)">Saisie du code</div>
+      <div class="field">
+        <label class="field-label">Code danger (ex : 33, 336, X423...)</label>
+        <input type="text" id="code-danger-input" placeholder="Ex : 336" maxlength="5" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <button class="btn-calc" style="background:var(--routiercolor); color:var(--bg)" onclick="decoderCodeDanger()">🔎 Décoder</button>
+    </div>
+
+    <div id="code-danger-result" style="display:none">
+      <div class="card" id="code-danger-eau-warning" style="display:none; border-color:var(--red); background:rgba(255,59,59,0.08)">
+        <div style="display:flex; align-items:center; gap:10px">
+          <span style="font-size:22px">🚫💧</span>
+          <span style="font-family:var(--font-title); font-weight:700; font-size:13px; color:var(--red)">X — Réagit dangereusement avec l'eau. Ne pas utiliser d'eau sans avis d'un spécialiste !</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--routiercolor)">Interprétation</div>
+        <div id="code-danger-lines" style="font-size:13px; color:var(--text2); line-height:2"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--routiercolor)">Aide-mémoire des chiffres</div>
+      <div style="font-size:12px; color:var(--text2); line-height:2.1">
+        <strong style="color:var(--text)">2</strong> — Émanation de gaz (pression / réaction chimique)<br>
+        <strong style="color:var(--text)">3</strong> — Inflammabilité liquides/gaz, ou liquide auto-échauffant<br>
+        <strong style="color:var(--text)">4</strong> — Inflammabilité des solides, ou solide auto-échauffant<br>
+        <strong style="color:var(--text)">5</strong> — Effet comburant (favorise l'incendie)<br>
+        <strong style="color:var(--text)">6</strong> — Toxicité ou danger d'infection<br>
+        <strong style="color:var(--text)">7</strong> — Radioactivité<br>
+        <strong style="color:var(--text)">8</strong> — Corrosivité<br>
+        <strong style="color:var(--text)">9</strong> — Danger de réaction violente spontanée<br>
+        <strong style="color:var(--text)">0</strong> — Pas de signification supplémentaire<br>
+        <strong style="color:var(--text)">Chiffre doublé</strong> — Intensification de ce danger<br>
+        <strong style="color:var(--text)">X devant le code</strong> — Réagit dangereusement avec l'eau
+      </div>
     </div>
   </div>
 
@@ -654,6 +762,58 @@ function ajouterGarde() {
         '<strong>La garde a peut-être quand même été ajoutée</strong> — ' +
         'vérifie ton agenda "Pompier" avant de recommencer, pour éviter un doublon.';
     });
+}
+
+// ── CODE DANGER (Kemler) ──────────────────────────────────
+const HAZARD_MEANINGS = {
+  '2': "Émanation de gaz par pression ou réaction chimique",
+  '3': "Inflammabilité des liquides (vapeurs) et gaz, ou liquide auto-échauffant",
+  '4': "Inflammabilité des solides, ou solide auto-échauffant",
+  '5': "Effet comburant (favorise l'incendie)",
+  '6': "Toxicité ou danger d'infection",
+  '7': "Radioactivité",
+  '8': "Corrosivité",
+  '9': "Danger de réaction violente spontanée"
+};
+
+function decoderCodeDanger() {
+  const raw = document.getElementById('code-danger-input').value.trim().toUpperCase();
+  const resultEl = document.getElementById('code-danger-result');
+  const eauWarningEl = document.getElementById('code-danger-eau-warning');
+  const linesEl = document.getElementById('code-danger-lines');
+
+  if (!raw) { alert('Saisis un code danger !'); return; }
+
+  let s = raw;
+  const eauDanger = s.startsWith('X');
+  if (eauDanger) s = s.slice(1);
+
+  const digits = s.split('').filter(c => /[0-9]/.test(c));
+  if (digits.length === 0) { alert('Code invalide : entre au moins un chiffre.'); return; }
+
+  const lines = [];
+  let i = 0;
+  while (i < digits.length) {
+    const d = digits[i];
+    let repeat = 1;
+    while (i + repeat < digits.length && digits[i + repeat] === d) repeat++;
+
+    if (d === '0') {
+      lines.push('<strong style="color:var(--text)">0</strong> — Pas de signification supplémentaire');
+    } else {
+      const meaning = HAZARD_MEANINGS[d] || 'Signification non répertoriée';
+      const label = d.repeat(repeat);
+      lines.push(
+        '<strong style="color:var(--routiercolor)">' + label + '</strong> — ' + meaning +
+        (repeat >= 2 ? ' <em style="color:var(--text3)">(danger intensifié)</em>' : '')
+      );
+    }
+    i += repeat;
+  }
+
+  resultEl.style.display = 'block';
+  eauWarningEl.style.display = eauDanger ? 'block' : 'none';
+  linesEl.innerHTML = lines.join('<br>');
 }
 
 function resetGlasgow() {
