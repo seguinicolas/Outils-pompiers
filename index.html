@@ -844,6 +844,46 @@ function ajouterGarde() {
     });
 }
 
+const GARDES_CACHE_KEY = 'gardes_cache_v1';
+
+function renderGardesListe(gardes) {
+  const listeEl = document.getElementById('gardes-liste');
+  if (!listeEl) return;
+
+  if (gardes.length === 0) {
+    listeEl.innerHTML = '<span style="color:var(--text3)">Aucune garde à venir.</span>';
+    return;
+  }
+
+  listeEl.innerHTML = gardes.map(g => {
+    const debut = new Date(g.dateDebut);
+    const fin = new Date(g.dateFin);
+    const dateStr = debut.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const heureDebut = debut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const finJourStr = fin.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    const heureFin = fin.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return (
+      '<div class="garde-item" data-eventid="' + g.eventId + '" data-label="' + dateStr + '">' +
+        '<div class="garde-item-info">' +
+          '<strong style="color:var(--text)">' + dateStr + '</strong>' +
+          '<span style="color:var(--text3); font-size:11px">' + heureDebut + ' → ' + finJourStr + ' ' + heureFin + '</span>' +
+        '</div>' +
+        '<div class="garde-item-actions">' +
+          '<span class="garde-item-fonction">' + g.fonction + '</span>' +
+          '<button class="garde-delete-btn" title="Supprimer cette garde">✕</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+
+  listeEl.querySelectorAll('.garde-delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.garde-item');
+      supprimerGarde(item.dataset.eventid, item.dataset.label);
+    });
+  });
+}
+
 function loadGardesAVenir() {
   const listeEl = document.getElementById('gardes-liste');
   if (!listeEl) return;
@@ -853,49 +893,38 @@ function loadGardesAVenir() {
     return;
   }
 
-  listeEl.textContent = 'Chargement...';
+  // Affiche immédiatement la dernière liste connue sur cet appareil,
+  // le temps que la version à jour arrive du réseau (utile en 4G lente)
+  let cachedGardes = null;
+  try {
+    const raw = localStorage.getItem(GARDES_CACHE_KEY);
+    if (raw) cachedGardes = JSON.parse(raw).gardes;
+  } catch (e) { /* cache illisible, on ignore */ }
+
+  if (cachedGardes) {
+    renderGardesListe(cachedGardes);
+  } else {
+    listeEl.textContent = 'Chargement...';
+  }
 
   fetch(GARDE_APPS_SCRIPT_URL)
     .then(r => r.json())
     .then(res => {
       if (!res.success) {
-        listeEl.innerHTML = '<span style="color:var(--red)">Erreur : ' + res.error + '</span>';
+        if (!cachedGardes) listeEl.innerHTML = '<span style="color:var(--red)">Erreur : ' + res.error + '</span>';
         return;
       }
-      if (res.gardes.length === 0) {
-        listeEl.innerHTML = '<span style="color:var(--text3)">Aucune garde à venir.</span>';
-        return;
-      }
-      listeEl.innerHTML = res.gardes.map(g => {
-        const debut = new Date(g.dateDebut);
-        const fin = new Date(g.dateFin);
-        const dateStr = debut.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-        const heureDebut = debut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        const finJourStr = fin.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-        const heureFin = fin.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-        return (
-          '<div class="garde-item" data-eventid="' + g.eventId + '" data-label="' + dateStr + '">' +
-            '<div class="garde-item-info">' +
-              '<strong style="color:var(--text)">' + dateStr + '</strong>' +
-              '<span style="color:var(--text3); font-size:11px">' + heureDebut + ' → ' + finJourStr + ' ' + heureFin + '</span>' +
-            '</div>' +
-            '<div class="garde-item-actions">' +
-              '<span class="garde-item-fonction">' + g.fonction + '</span>' +
-              '<button class="garde-delete-btn" title="Supprimer cette garde">✕</button>' +
-            '</div>' +
-          '</div>'
-        );
-      }).join('');
-
-      listeEl.querySelectorAll('.garde-delete-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const item = btn.closest('.garde-item');
-          supprimerGarde(item.dataset.eventid, item.dataset.label);
-        });
-      });
+      try {
+        localStorage.setItem(GARDES_CACHE_KEY, JSON.stringify({ gardes: res.gardes, ts: Date.now() }));
+      } catch (e) { /* stockage plein ou indisponible, tant pis */ }
+      renderGardesListe(res.gardes);
     })
     .catch(err => {
-      listeEl.innerHTML = '<span style="color:var(--red)">Erreur réseau : ' + err.message + '</span>';
+      // Si on a déjà affiché une liste en cache, on la laisse telle quelle
+      // plutôt que d'afficher une erreur qui remplacerait des infos valables.
+      if (!cachedGardes) {
+        listeEl.innerHTML = '<span style="color:var(--red)">Erreur réseau : ' + err.message + '</span>';
+      }
     });
 }
 
