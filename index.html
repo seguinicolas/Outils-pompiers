@@ -534,6 +534,11 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
 
       <div id="garde-status" style="margin-top:10px; font-size:12px; text-align:center; display:none"></div>
     </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--gardecolor)">Gardes à venir</div>
+      <div id="gardes-liste" style="font-size:13px; color:var(--text2)">Chargement...</div>
+    </div>
   </div>
 
   <div class="page" id="page-code-danger">
@@ -647,6 +652,7 @@ function naviguer(page, el, type) {
   if (el) el.classList.add('active-' + type);
   closeMenu();
   window.scrollTo(0, 0);
+  if (page === 'garde') loadGardesAVenir();
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
@@ -808,6 +814,7 @@ function ajouterGarde() {
       if (res.success) {
         statusEl.style.color = 'var(--gardecolor)';
         statusEl.textContent = '✅ Garde ajoutée à l\'agenda !';
+        loadGardesAVenir();
       } else {
         statusEl.style.color = 'var(--red)';
         statusEl.textContent = '❌ Erreur : ' + (res.error || 'inconnue');
@@ -821,6 +828,51 @@ function ajouterGarde() {
         '⚠️ La connexion a été interrompue avant la confirmation.<br>' +
         '<strong>La garde a peut-être quand même été ajoutée</strong> — ' +
         'vérifie ton agenda "Pompier" avant de recommencer, pour éviter un doublon.';
+    });
+}
+
+function loadGardesAVenir() {
+  const listeEl = document.getElementById('gardes-liste');
+  if (!listeEl) return;
+
+  if (GARDE_APPS_SCRIPT_URL.includes('COLLE_ICI')) {
+    listeEl.innerHTML = '<span style="color:var(--text3)">Configure d\'abord l\'URL Apps Script.</span>';
+    return;
+  }
+
+  listeEl.textContent = 'Chargement...';
+
+  fetch(GARDE_APPS_SCRIPT_URL)
+    .then(r => r.json())
+    .then(res => {
+      if (!res.success) {
+        listeEl.innerHTML = '<span style="color:var(--red)">Erreur : ' + res.error + '</span>';
+        return;
+      }
+      if (res.gardes.length === 0) {
+        listeEl.innerHTML = '<span style="color:var(--text3)">Aucune garde à venir.</span>';
+        return;
+      }
+      listeEl.innerHTML = res.gardes.map(g => {
+        const debut = new Date(g.dateDebut);
+        const fin = new Date(g.dateFin);
+        const dateStr = debut.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        const heureDebut = debut.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const finJourStr = fin.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+        const heureFin = fin.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        return (
+          '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border)">' +
+            '<div>' +
+              '<strong style="color:var(--text)">' + dateStr + '</strong><br>' +
+              '<span style="color:var(--text3); font-size:11px">' + heureDebut + ' → ' + finJourStr + ' ' + heureFin + '</span>' +
+            '</div>' +
+            '<span style="font-family:var(--font-title); font-weight:700; font-size:12px; color:var(--gardecolor); background:rgba(78,226,154,0.12); padding:4px 10px; border-radius:20px; flex-shrink:0">' + g.fonction + '</span>' +
+          '</div>'
+        );
+      }).join('');
+    })
+    .catch(err => {
+      listeEl.innerHTML = '<span style="color:var(--red)">Erreur réseau : ' + err.message + '</span>';
     });
 }
 
