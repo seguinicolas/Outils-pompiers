@@ -173,7 +173,10 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
 .constantes-table tr.row-selected td { color:var(--text); background:rgba(78,173,255,0.06); }
 
 /* GARDE - liste */
-.garde-item { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.garde-item { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); }
+.garde-item-info { min-width:0; flex:1 1 auto; overflow:hidden; }
+.garde-item-info strong, .garde-item-info span { display:block; overflow:hidden; text-overflow:ellipsis; }
+.garde-item-actions { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 .garde-item-fonction { font-family:var(--font-title); font-weight:700; font-size:12px; color:var(--gardecolor); background:rgba(78,226,154,0.12); padding:4px 10px; border-radius:20px; flex-shrink:0; }
 .garde-delete-btn {
   width:28px; height:28px; flex-shrink:0; border-radius:50%; border:1px solid var(--border2);
@@ -872,11 +875,11 @@ function loadGardesAVenir() {
         const heureFin = fin.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         return (
           '<div class="garde-item" data-eventid="' + g.eventId + '" data-label="' + dateStr + '">' +
-            '<div>' +
-              '<strong style="color:var(--text)">' + dateStr + '</strong><br>' +
+            '<div class="garde-item-info">' +
+              '<strong style="color:var(--text)">' + dateStr + '</strong>' +
               '<span style="color:var(--text3); font-size:11px">' + heureDebut + ' → ' + finJourStr + ' ' + heureFin + '</span>' +
             '</div>' +
-            '<div style="display:flex; align-items:center; gap:8px">' +
+            '<div class="garde-item-actions">' +
               '<span class="garde-item-fonction">' + g.fonction + '</span>' +
               '<button class="garde-delete-btn" title="Supprimer cette garde">✕</button>' +
             '</div>' +
