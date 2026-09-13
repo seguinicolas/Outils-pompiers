@@ -155,6 +155,22 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
 .o2-result-value { font-family:var(--font-title); font-size:40px; font-weight:800; line-height:1; letter-spacing:-1px; }
 .o2-result-unit { font-size:12px; opacity:0.7; margin-top:4px; }
 .o2-result-heure { font-size:11px; margin-top:6px; opacity:0.6; }
+
+/* CONSTANTES */
+.constante-pill {
+  flex:1 1 calc(50% - 8px); min-width:130px; padding:12px 10px; border-radius:var(--radius-sm);
+  border:1px solid var(--border2); background:var(--bg); cursor:pointer;
+  font-family:var(--font-mono); font-size:12px; color:var(--text2); text-align:center; transition:all .15s;
+}
+.constante-pill:hover { border-color:var(--sapcolor); }
+.constante-pill.selected { background:rgba(78,173,255,0.12); border-color:var(--sapcolor); color:var(--sapcolor); }
+.constante-pill-age { display:block; font-size:9px; color:var(--text3); margin-top:3px; }
+.constante-pill.selected .constante-pill-age { color:var(--sapcolor); opacity:0.8; }
+.constantes-table { width:100%; border-collapse:collapse; }
+.constantes-table th, .constantes-table td { padding:9px 8px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+.constantes-table th { color:var(--sapcolor); font-family:var(--font-title); font-size:9px; letter-spacing:1px; text-transform:uppercase; }
+.constantes-table td { color:var(--text2); font-size:11px; }
+.constantes-table tr.row-selected td { color:var(--text); background:rgba(78,173,255,0.06); }
 </style>
 </head>
 <body>
@@ -205,7 +221,7 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
   <div class="menu-section-label">🟠 Secours Routier</div>
   <div class="menu-item" onclick="naviguer('code-danger', this, 'routier')">
     <span class="menu-item-icon">☣️</span>
-    <span class="menu-item-text">Code danger</span>
+    <span class="menu-item-text">Code danger & matière</span>
   </div>
 
   <div class="menu-divider"></div>
@@ -267,8 +283,8 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
       <div class="home-card home-card-routier home-card-full" onclick="naviguer('code-danger', null, 'routier')">
         <div class="home-card-icon" style="margin-bottom:0">☣️</div>
         <div>
-          <div class="home-card-title" style="color:var(--routiercolor)">Code danger</div>
-          <div class="home-card-sub">Décoder un code Kemler / panneau ADR</div>
+          <div class="home-card-title" style="color:var(--routiercolor)">Code danger & matière</div>
+          <div class="home-card-sub">Décoder un panneau ADR (Kemler + n° ONU)</div>
         </div>
       </div>
     </div>
@@ -452,9 +468,36 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
   <div class="page" id="page-constantes">
     <div class="page-label">Secours à Personne</div>
     <div class="page-title" style="color:var(--sapcolor)">📊 Constantes</div>
-    <div class="placeholder">
-      <div class="placeholder-icon">🚧</div>
-      Page en construction — à venir !
+
+    <div class="section-strip section-strip-sap">
+      <span style="font-size:18px">ℹ️</span>
+      <span class="section-strip-text" style="color:var(--sapcolor)">Sélectionne une catégorie d'âge</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--sapcolor)">Catégorie</div>
+      <div id="constantes-selector" style="display:flex; flex-wrap:wrap; gap:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="constante-detail-title" style="color:var(--sapcolor)">—</div>
+      <div id="constante-detail-lines" style="font-size:13px; color:var(--text2); line-height:2.2"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--sapcolor)">Tableau complet</div>
+      <div style="overflow-x:auto">
+        <table class="constantes-table" id="constantes-table">
+          <thead>
+            <tr>
+              <th>Catégorie</th><th>Âge</th><th>Fréq. respi</th><th>SAT O²</th>
+              <th>Insufflation<br>(arrêt cardiaque)</th><th>Fréq. cardiaque</th>
+              <th>PAS min.</th><th>Massage + DEA</th>
+            </tr>
+          </thead>
+          <tbody id="constantes-table-body"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -495,18 +538,22 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
 
   <div class="page" id="page-code-danger">
     <div class="page-label">Secours Routier</div>
-    <div class="page-title" style="color:var(--routiercolor)">☣️ Code danger</div>
+    <div class="page-title" style="color:var(--routiercolor)">☣️ Code danger & matière</div>
 
     <div class="section-strip" style="background:rgba(255,182,39,0.08); border-left:4px solid var(--routiercolor)">
       <span style="font-size:18px">ℹ️</span>
-      <span class="section-strip-text" style="color:var(--routiercolor)">Code Kemler (partie haute du panneau orange ADR)</span>
+      <span class="section-strip-text" style="color:var(--routiercolor)">Panneau ADR : code danger (haut) / n° matière ONU (bas)</span>
     </div>
 
     <div class="card">
-      <div class="card-title" style="color:var(--routiercolor)">Saisie du code</div>
+      <div class="card-title" style="color:var(--routiercolor)">Saisie du panneau</div>
       <div class="field">
-        <label class="field-label">Code danger (ex : 33, 336, X423...)</label>
+        <label class="field-label">Code danger — Kemler (ex : 33, 336, X423...)</label>
         <input type="text" id="code-danger-input" placeholder="Ex : 336" maxlength="5" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="field">
+        <label class="field-label">N° matière — ONU (4 chiffres, ex : 1965)</label>
+        <input type="text" id="code-matiere-input" placeholder="Ex : 1965" maxlength="4" inputmode="numeric">
       </div>
       <button class="btn-calc" style="background:var(--routiercolor); color:var(--bg)" onclick="decoderCodeDanger()">🔎 Décoder</button>
     </div>
@@ -520,8 +567,13 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
       </div>
 
       <div class="card">
-        <div class="card-title" style="color:var(--routiercolor)">Interprétation</div>
+        <div class="card-title" style="color:var(--routiercolor)">Code danger</div>
         <div id="code-danger-lines" style="font-size:13px; color:var(--text2); line-height:2"></div>
+      </div>
+
+      <div class="card" id="code-matiere-card" style="display:none">
+        <div class="card-title" style="color:var(--routiercolor)">Matière (n° ONU)</div>
+        <div id="code-matiere-lines" style="font-size:13px; color:var(--text2); line-height:2"></div>
       </div>
     </div>
 
@@ -539,6 +591,14 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
         <strong style="color:var(--text)">0</strong> — Pas de signification supplémentaire<br>
         <strong style="color:var(--text)">Chiffre doublé</strong> — Intensification de ce danger<br>
         <strong style="color:var(--text)">X devant le code</strong> — Réagit dangereusement avec l'eau
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="color:var(--routiercolor)">⚠️ À propos de la base matières</div>
+      <div style="font-size:12px; color:var(--text3); line-height:1.8">
+        Liste non exhaustive limitée aux matières les plus courantes en intervention.
+        Pour tout n° ONU non reconnu, se référer au Guide des Interventions ADR (GDU) ou à la fiche de sécurité du transporteur.
       </div>
     </div>
   </div>
@@ -583,7 +643,7 @@ function closeMenu() {
 function naviguer(page, el, type) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active-sap', 'active-inc'));
+  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active-sap', 'active-inc', 'active-garde', 'active-routier'));
   if (el) el.classList.add('active-' + type);
   closeMenu();
   window.scrollTo(0, 0);
@@ -764,7 +824,7 @@ function ajouterGarde() {
     });
 }
 
-// ── CODE DANGER (Kemler) ──────────────────────────────────
+// ── CODE DANGER (Kemler) & MATIÈRE (ONU) ──────────────────
 const HAZARD_MEANINGS = {
   '2': "Émanation de gaz par pression ou réaction chimique",
   '3': "Inflammabilité des liquides (vapeurs) et gaz, ou liquide auto-échauffant",
@@ -776,45 +836,173 @@ const HAZARD_MEANINGS = {
   '9': "Danger de réaction violente spontanée"
 };
 
+// Liste non exhaustive des matières les plus courantes en intervention
+const UN_MATIERES = {
+  '1203': { nom: 'Essence (carburant automobile)', classe: '3' },
+  '1202': { nom: 'Gazole / fioul domestique', classe: '3' },
+  '1223': { nom: 'Kérosène', classe: '3' },
+  '1863': { nom: 'Carburéacteur', classe: '3' },
+  '1170': { nom: 'Éthanol (alcool éthylique)', classe: '3' },
+  '1090': { nom: 'Acétone', classe: '3' },
+  '1219': { nom: 'Isopropanol', classe: '3' },
+  '1965': { nom: 'Gaz de pétrole liquéfiés (GPL)', classe: '2' },
+  '1978': { nom: 'Propane', classe: '2' },
+  '1011': { nom: 'Butane', classe: '2' },
+  '1001': { nom: 'Acétylène dissous', classe: '2' },
+  '1049': { nom: 'Hydrogène comprimé', classe: '2' },
+  '1072': { nom: 'Oxygène comprimé', classe: '2' },
+  '1013': { nom: 'Dioxyde de carbone', classe: '2' },
+  '1017': { nom: 'Chlore', classe: '2' },
+  '1005': { nom: 'Ammoniac anhydre', classe: '2' },
+  '1830': { nom: 'Acide sulfurique', classe: '8' },
+  '1789': { nom: 'Acide chlorhydrique', classe: '8' },
+  '2031': { nom: 'Acide nitrique', classe: '8' },
+  '1824': { nom: 'Hydroxyde de sodium en solution (soude)', classe: '8' },
+  '1791': { nom: 'Hypochlorite en solution (eau de javel)', classe: '8' },
+  '1942': { nom: "Nitrate d'ammonium", classe: '5.1' },
+  '1479': { nom: 'Matière solide comburante, n.s.a.', classe: '5.1' },
+  '2794': { nom: "Accumulateurs électriques remplis d'électrolyte acide", classe: '8' },
+  '3480': { nom: 'Piles au lithium ion', classe: '9' },
+  '3481': { nom: 'Piles au lithium ion contenues dans un équipement', classe: '9' },
+  '3082': { nom: "Matière dangereuse pour l'environnement, liquide, n.s.a.", classe: '9' }
+};
+
 function decoderCodeDanger() {
   const raw = document.getElementById('code-danger-input').value.trim().toUpperCase();
+  const matiereRaw = document.getElementById('code-matiere-input').value.trim();
   const resultEl = document.getElementById('code-danger-result');
   const eauWarningEl = document.getElementById('code-danger-eau-warning');
   const linesEl = document.getElementById('code-danger-lines');
+  const matiereCardEl = document.getElementById('code-matiere-card');
+  const matiereLinesEl = document.getElementById('code-matiere-lines');
 
-  if (!raw) { alert('Saisis un code danger !'); return; }
-
-  let s = raw;
-  const eauDanger = s.startsWith('X');
-  if (eauDanger) s = s.slice(1);
-
-  const digits = s.split('').filter(c => /[0-9]/.test(c));
-  if (digits.length === 0) { alert('Code invalide : entre au moins un chiffre.'); return; }
-
-  const lines = [];
-  let i = 0;
-  while (i < digits.length) {
-    const d = digits[i];
-    let repeat = 1;
-    while (i + repeat < digits.length && digits[i + repeat] === d) repeat++;
-
-    if (d === '0') {
-      lines.push('<strong style="color:var(--text)">0</strong> — Pas de signification supplémentaire');
-    } else {
-      const meaning = HAZARD_MEANINGS[d] || 'Signification non répertoriée';
-      const label = d.repeat(repeat);
-      lines.push(
-        '<strong style="color:var(--routiercolor)">' + label + '</strong> — ' + meaning +
-        (repeat >= 2 ? ' <em style="color:var(--text3)">(danger intensifié)</em>' : '')
-      );
-    }
-    i += repeat;
-  }
+  if (!raw && !matiereRaw) { alert('Saisis au moins un des deux champs !'); return; }
 
   resultEl.style.display = 'block';
-  eauWarningEl.style.display = eauDanger ? 'block' : 'none';
-  linesEl.innerHTML = lines.join('<br>');
+
+  // Code danger (Kemler)
+  if (raw) {
+    let s = raw;
+    const eauDanger = s.startsWith('X');
+    if (eauDanger) s = s.slice(1);
+    const digits = s.split('').filter(c => /[0-9]/.test(c));
+
+    if (digits.length === 0) {
+      linesEl.innerHTML = 'Code danger invalide.';
+      eauWarningEl.style.display = 'none';
+    } else {
+      const lines = [];
+      let i = 0;
+      while (i < digits.length) {
+        const d = digits[i];
+        let repeat = 1;
+        while (i + repeat < digits.length && digits[i + repeat] === d) repeat++;
+
+        if (d === '0') {
+          lines.push('<strong style="color:var(--text)">0</strong> — Pas de signification supplémentaire');
+        } else {
+          const meaning = HAZARD_MEANINGS[d] || 'Signification non répertoriée';
+          const label = d.repeat(repeat);
+          lines.push(
+            '<strong style="color:var(--routiercolor)">' + label + '</strong> — ' + meaning +
+            (repeat >= 2 ? ' <em style="color:var(--text3)">(danger intensifié)</em>' : '')
+          );
+        }
+        i += repeat;
+      }
+      linesEl.innerHTML = lines.join('<br>');
+      eauWarningEl.style.display = eauDanger ? 'block' : 'none';
+    }
+  } else {
+    linesEl.innerHTML = '<span style="color:var(--text3)">Aucun code danger saisi.</span>';
+    eauWarningEl.style.display = 'none';
+  }
+
+  // N° matière (ONU)
+  if (matiereRaw) {
+    matiereCardEl.style.display = 'block';
+    const infos = UN_MATIERES[matiereRaw];
+    if (infos) {
+      matiereLinesEl.innerHTML =
+        '<strong style="color:var(--text)">UN ' + matiereRaw + '</strong> — ' + infos.nom + '<br>' +
+        'Classe ADR : <strong style="color:var(--routiercolor)">' + infos.classe + '</strong>';
+    } else {
+      matiereLinesEl.innerHTML =
+        '<span style="color:var(--text3)">N° ' + matiereRaw + ' non répertorié dans la liste courante.<br>' +
+        'Consulte le Guide des Interventions ADR (GDU) ou la fiche du transporteur.</span>';
+    }
+  } else {
+    matiereCardEl.style.display = 'none';
+  }
 }
+
+// ── CONSTANTES ────────────────────────────────────────────
+const CONSTANTES_DATA = [
+  {
+    id: 'nouveau-ne', label: 'Nouveau-né', age: "jusqu'à 28 jours",
+    fr: '40 - 60', sat: 'Sup. ou égale à 94 %', insuff: '40 par minute',
+    fc: '120 - 160', pas: '60', massage: '5 / 15 / 2'
+  },
+  {
+    id: 'nourrisson', label: 'Nourrisson', age: 'de 29 jours à 2 ans',
+    fr: '30 - 40', sat: 'Sup. ou égale à 94 %', insuff: '30 par minute',
+    fc: '100 - 160', pas: '70', massage: '5 / 15 / 2'
+  },
+  {
+    id: 'enfant', label: 'Enfant', age: 'de 2 ans à la puberté',
+    fr: '20 - 30', sat: 'Sup. ou égale à 94 %', insuff: '20 par minute',
+    fc: '70 - 140', pas: '90 (+ de 10 ans) · 70 + (2 × âge) (- de 10 ans)', massage: '5 / 15 / 2'
+  },
+  {
+    id: 'adulte', label: 'Adulte', age: 'à partir de la puberté',
+    fr: '12 - 20', sat: 'Sup. ou égale à 94 %', insuff: '10 par minute',
+    fc: '60 - 100', pas: '100', massage: '30 / 2'
+  }
+];
+
+function initConstantes() {
+  const selector = document.getElementById('constantes-selector');
+  const tbody = document.getElementById('constantes-table-body');
+
+  selector.innerHTML = CONSTANTES_DATA.map(c =>
+    `<button class="constante-pill" id="pill-${c.id}" onclick="selectConstante('${c.id}')">
+      ${c.label}<span class="constante-pill-age">${c.age}</span>
+    </button>`
+  ).join('');
+
+  tbody.innerHTML = CONSTANTES_DATA.map(c =>
+    `<tr id="row-${c.id}">
+      <td><strong style="color:var(--text)">${c.label}</strong></td>
+      <td>${c.age}</td><td>${c.fr}</td><td>${c.sat}</td>
+      <td>${c.insuff}</td><td>${c.fc}</td><td>${c.pas}</td><td>${c.massage}</td>
+    </tr>`
+  ).join('');
+
+  selectConstante('adulte');
+}
+
+function selectConstante(id) {
+  const c = CONSTANTES_DATA.find(x => x.id === id);
+  if (!c) return;
+
+  document.querySelectorAll('.constante-pill').forEach(p => p.classList.remove('selected'));
+  document.getElementById('pill-' + id).classList.add('selected');
+
+  document.querySelectorAll('.constantes-table tr').forEach(r => r.classList.remove('row-selected'));
+  const row = document.getElementById('row-' + id);
+  if (row) row.classList.add('row-selected');
+
+  document.getElementById('constante-detail-title').textContent = c.label + ' — ' + c.age;
+  document.getElementById('constante-detail-lines').innerHTML =
+    'Fréquence respiratoire : <strong style="color:var(--text)">' + c.fr + '</strong><br>' +
+    'SAT O² : <strong style="color:var(--text)">' + c.sat + '</strong><br>' +
+    "Fréquence d'insufflation (arrêt cardiaque) : <strong style=\"color:var(--text)\">" + c.insuff + '</strong><br>' +
+    'Fréquence cardiaque : <strong style="color:var(--text)">' + c.fc + '</strong><br>' +
+    'PAS minimale : <strong style="color:var(--text)">' + c.pas + '</strong><br>' +
+    'Massage cardiaque + DEA : <strong style="color:var(--text)">' + c.massage + '</strong>';
+}
+
+document.addEventListener('DOMContentLoaded', initConstantes);
 
 function resetGlasgow() {
   glasgowScores.Y = 0; glasgowScores.V = 0; glasgowScores.M = 0;
