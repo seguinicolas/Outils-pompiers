@@ -171,6 +171,16 @@ html, body { background:var(--bg); color:var(--text); font-family:var(--font-mon
 .constantes-table th { color:var(--sapcolor); font-family:var(--font-title); font-size:9px; letter-spacing:1px; text-transform:uppercase; }
 .constantes-table td { color:var(--text2); font-size:11px; }
 .constantes-table tr.row-selected td { color:var(--text); background:rgba(78,173,255,0.06); }
+
+/* GARDE - liste */
+.garde-item { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.garde-item-fonction { font-family:var(--font-title); font-weight:700; font-size:12px; color:var(--gardecolor); background:rgba(78,226,154,0.12); padding:4px 10px; border-radius:20px; flex-shrink:0; }
+.garde-delete-btn {
+  width:28px; height:28px; flex-shrink:0; border-radius:50%; border:1px solid var(--border2);
+  background:var(--bg3); color:var(--text3); font-size:14px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all .15s;
+}
+.garde-delete-btn:hover { border-color:var(--red); color:var(--red); background:rgba(255,59,59,0.08); }
 </style>
 </head>
 <body>
@@ -861,18 +871,57 @@ function loadGardesAVenir() {
         const finJourStr = fin.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
         const heureFin = fin.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         return (
-          '<div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border)">' +
+          '<div class="garde-item" data-eventid="' + g.eventId + '" data-label="' + dateStr + '">' +
             '<div>' +
               '<strong style="color:var(--text)">' + dateStr + '</strong><br>' +
               '<span style="color:var(--text3); font-size:11px">' + heureDebut + ' → ' + finJourStr + ' ' + heureFin + '</span>' +
             '</div>' +
-            '<span style="font-family:var(--font-title); font-weight:700; font-size:12px; color:var(--gardecolor); background:rgba(78,226,154,0.12); padding:4px 10px; border-radius:20px; flex-shrink:0">' + g.fonction + '</span>' +
+            '<div style="display:flex; align-items:center; gap:8px">' +
+              '<span class="garde-item-fonction">' + g.fonction + '</span>' +
+              '<button class="garde-delete-btn" title="Supprimer cette garde">✕</button>' +
+            '</div>' +
           '</div>'
         );
       }).join('');
+
+      listeEl.querySelectorAll('.garde-delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.garde-item');
+          supprimerGarde(item.dataset.eventid, item.dataset.label);
+        });
+      });
     })
     .catch(err => {
       listeEl.innerHTML = '<span style="color:var(--red)">Erreur réseau : ' + err.message + '</span>';
+    });
+}
+
+function supprimerGarde(eventId, label) {
+  const ok = confirm(
+    'Supprimer définitivement la garde du ' + label + ' ?\n\n' +
+    'L\'événement sera retiré de l\'agenda "Pompier" et la ligne d\'historique sera effacée. ' +
+    'Cette action est irréversible.'
+  );
+  if (!ok) return;
+
+  fetch(GARDE_APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'delete', eventId: eventId })
+  })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        loadGardesAVenir();
+      } else {
+        alert('Erreur lors de la suppression : ' + (res.error || 'inconnue'));
+      }
+    })
+    .catch(err => {
+      alert(
+        'Erreur réseau pendant la suppression : ' + err.message +
+        '\nVérifie l\'agenda avant de réessayer — la suppression a peut-être quand même réussi côté serveur.'
+      );
     });
 }
 
